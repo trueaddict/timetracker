@@ -2,6 +2,13 @@ import json
 import time
 from datetime import date
 
+#TODO
+# - Päivämäärän tarkistaminen, että ei tule tuplia dataan
+# - Ajan träkkäys
+#   - Komentorivin kuuntelu
+# - Datan tallentaminen säännöllisin ajoin
+# - Datan jakaminen viikoille
+# - 
 
 def timetracker():
     readJson()
