@@ -17,8 +17,11 @@ time_end_types = ["loppu", "end", "l", "lounas"]
 close_types = "exit"
 help_type = "help"
 
+if os.getcwd() == "/Users/otto":
+        data_folder = "coding/timetracker/data/"
+data_folder = ""
+
 def timetracker():
-    #readJson()
     readTimeType()
 
 
@@ -69,14 +72,14 @@ def endTime(timeStart, type_t):
 
 def saveData(usedTime, type_t):
     weekNum = str(getWeek())
-    if os.path.isfile('data/week'+weekNum+'.json'):
-        with open('data/week'+weekNum+'.json') as file_data:
+    if os.path.isfile(data_folder+'week'+weekNum+'.json'):
+        with open(data_folder+'week'+weekNum+'.json') as file_data:
             data = json.load(file_data)
             handleJson(data, usedTime, type_t)
             file_data.close()
             save(data, weekNum)
     else:
-        with open('data/week'+weekNum+'.json', 'w') as file_data:
+        with open(data_folder+'week'+weekNum+'.json', 'x') as file_data:
             data = []
             day =   {   "date" : "",
                         "uni" : 0,
@@ -86,13 +89,13 @@ def saveData(usedTime, type_t):
                     }
             day["date"] = str(date.today())
             data.append(day)
-            handleJson(data, usedTime, type_t)
+            #handleJson(data, usedTime, type_t)
             json.dump(data, file_data)
             file_data.close()
 
 
 def save(data, weekNum):
-    with open('data/week'+weekNum+'.json', 'w') as file_data:
+    with open(data_folder+'week'+weekNum+'.json', 'w') as file_data:
         json.dump(data, file_data)
 
 
