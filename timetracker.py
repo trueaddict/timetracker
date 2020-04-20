@@ -19,7 +19,7 @@ help_type = "help"
 
 if os.getcwd() == "/Users/otto":
         data_folder = "coding/timetracker/data/"
-data_folder = ""
+data_folder = "/data/"
 
 def timetracker():
     readTimeType()
