@@ -6,6 +6,7 @@ from datetime import date
 #TODO
 # - Poikkeavan Inputin hallinta
 # - 
+# - Json-filen alustus dynaamisesti
 # - Työprojektin / koulukurssin yksilöllinen seuranta
 # - Datan syöttö ulos
 #   - Komentorivi
@@ -17,9 +18,10 @@ time_end_types = ["loppu", "end", "l", "lounas"]
 close_types = "exit"
 help_type = "help"
 
+data_folder = "data/"
+print(os.getcwd())
 if os.getcwd() == "/Users/otto":
         data_folder = "coding/timetracker/data/"
-data_folder = "/data/"
 
 def timetracker():
     readTimeType()
@@ -65,6 +67,10 @@ def endTime(timeStart, type_t):
 
             print("Used time: ")
             usedTime = countUsedTime(timeEnd, timeStart)
+
+            #Debug
+            usedTime = 420
+
             listen = False
             saveData(usedTime, type_t)
             timetracker()
@@ -73,13 +79,15 @@ def endTime(timeStart, type_t):
 def saveData(usedTime, type_t):
     weekNum = str(getWeek())
     if os.path.isfile(data_folder+'week'+weekNum+'.json'):
+        print('File already exists')
         with open(data_folder+'week'+weekNum+'.json') as file_data:
             data = json.load(file_data)
-            handleJson(data, usedTime, type_t)
+            data = handleJson(data, usedTime, type_t)
             file_data.close()
             save(data, weekNum)
     else:
-        with open(data_folder+'week'+weekNum+'.json', 'x') as file_data:
+        with open(data_folder+'week'+weekNum+'.json', 'w') as file_data:
+            print('Creating new file / starting new week')
             data = []
             day =   {   "date" : "",
                         "uni" : 0,
@@ -88,8 +96,8 @@ def saveData(usedTime, type_t):
                         "muu" : 0
                     }
             day["date"] = str(date.today())
+            day[type_t] = usedTime
             data.append(day)
-            #handleJson(data, usedTime, type_t)
             json.dump(data, file_data)
             file_data.close()
 
@@ -100,19 +108,23 @@ def save(data, weekNum):
 
 
 def handleJson(data, usedTime, type_t):
+    print(data)
     for i in data:
         if str(date.today()) == i["date"]:
+            print('mentiinkö tänne?')
             i[type_t] = i[type_t] + usedTime
-        else:
-            day =   {   "date" : "",
-                        "uni" : 0,
-                        "opiskelu" : 0,
-                        "tyot" : 0,
-                        "muu" : 0
-                    }
-            day["date"] = str(date.today())
-            i[type_t] = i[type_t] + usedTime
-            data.append(day)
+            return data
+    day =   {   "date" : "",
+                "uni" : 0,
+                "opiskelu" : 0,
+                "tyot" : 0,
+                "muu" : 0
+            }
+    day["date"] = str(date.today())
+    day[type_t] = day[type_t] + usedTime
+    print(day)
+    data.append(day)
+    return data
 
 
 def countUsedTime(timeEnd, timeStart):
