@@ -69,7 +69,7 @@ def endTime(timeStart, type_t):
             usedTime = countUsedTime(timeEnd, timeStart)
 
             #Debug
-            usedTime = 420
+            #usedTime = 420
 
             listen = False
             saveData(usedTime, type_t)
