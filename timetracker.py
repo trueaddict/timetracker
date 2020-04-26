@@ -98,20 +98,18 @@ def saveData(usedTime, type_t):
             day["date"] = str(date.today())
             day[type_t] = usedTime
             data.append(day)
-            json.dump(data, file_data)
+            file_data.write(json.dumps(data, indent=4))
             file_data.close()
 
 
 def save(data, weekNum):
     with open(data_folder+'week'+weekNum+'.json', 'w') as file_data:
-        json.dump(data, file_data)
+        file_data.write(json.dumps(data, indent=4))
 
 
 def handleJson(data, usedTime, type_t):
-    print(data)
     for i in data:
         if str(date.today()) == i["date"]:
-            print('mentiinkö tänne?')
             i[type_t] = i[type_t] + usedTime
             return data
     day =   {   "date" : "",
@@ -122,7 +120,6 @@ def handleJson(data, usedTime, type_t):
             }
     day["date"] = str(date.today())
     day[type_t] = day[type_t] + usedTime
-    print(day)
     data.append(day)
     return data
 
