@@ -6,17 +6,31 @@ from datetime import date
 #TODO
 # - Poikkeavan Inputin hallinta
 # - 
-# - Json-filen alustus dynaamisesti
-# - Työprojektin / koulukurssin yksilöllinen seuranta
+# - Koulukurssin yksilöllinen seuranta (Työprojektien seuranta)
 # - Datan syöttö ulos
-#   - Komentorivi
+#   - Komentorivi <- DONE
 #   - Harvest
 
-time_types = ["uni", "opiskelu", "tyot", "muu"]
+time_types = ["sleep", "study", "work", "other"]
 time_types_lyh =  ["un", "op", "ty", "mu"]
 time_end_types = ["loppu", "end", "l", "lounas"]
 close_types = "exit"
 help_type = "help"
+nayta_list = ["n", "nayta", "show"]
+
+default_project = "kehitysprojekti"
+default_projects = {
+    "project_name" : default_project,
+    "time_used" : 0
+}
+
+default_day = { 
+    "date" : str(date.today()),
+    "sleep" : 0,
+    "study" : 0,
+    "work" : [default_projects],
+    "other" : 0
+}
 
 data_folder = "data/"
 print(os.getcwd())
@@ -24,47 +38,75 @@ if os.getcwd() == "/Users/otto":
         data_folder = "coding/timetracker/data/"
 
 def timetracker():
-    readTimeType()
+    data = initWeek()
+    readTimeType(data)
 
 
-def readTimeType():
-    time_type = input()
-    if close_types == time_type:
+def initWeek():
+    weekNum = str(getWeek())
+    if os.path.isfile(data_folder+'week'+weekNum+'.json'):
+        with open(data_folder+'week'+weekNum+'.json') as file_data:
+            print('File already exists')
+            data = json.load(file_data)
+            inc_today = True
+            for day in data:
+                if day["date"] == str(date.today()):
+                    inc_today = False
+            if inc_today:
+                data.append(default_day)
+
+            return data
+    else:
+        with open(data_folder+'week'+weekNum+'.json', 'w') as file_data:
+            print('Creating new file / starting new week')
+            data = []
+            data.append(default_day)
+            file_data.write(json.dumps(data, indent=4))
+            file_data.close()
+            return data
+            
+
+def readTimeType(data):
+    time_type = input().split(' ')
+    if close_types == time_type[0]:
         close()
-    if help_type == time_type:
+    if help_type == time_type[0]:
         help_info()
+    if time_type[0] in nayta_list:
+        nayta(data)
     for i in range(0,len(time_types)):
-        if time_types[i] == time_type:
-            startTime(time_types[i])
-        elif time_types_lyh[i] == time_type:
-            startTime(time_types[i])
-   
+        if time_types[i] == time_type[0]:
+            if (len(time_type) > 1):
+                startTime(data, time_types[i], time_type[1])
+            else: startTime(data, time_types[i], default_project)
+        elif time_types_lyh[i] == time_type[0]:
+            if (len(time_type) > 1):
+                startTime(data, time_types[i], time_type[1])
+            else: startTime(data, time_types[i], default_project)
+    
 
-def startTime(type_t):
+def startTime(data, type_t, project):
     timeStart = time.time()
-    print( "Started " + type_t)
-    timePrint(timeStart)
-    endTime(timeStart, type_t)
+    print( "Started " + type_t + " '" + project + "'")
+    timePrint("", timeStart)
+    endTime(data, timeStart, type_t, project)
 
 
-def endTime(timeStart, type_t):
+def endTime(data, timeStart, type_t, project):
     listen = True
     while listen:
         input_listen = input()
         if input_listen == close_types:
             timeEnd = time.time()
             usedTime = countUsedTime(timeEnd, timeStart)
-            saveData(usedTime, type_t)
+            saveData(data, usedTime, type_t, project)
             listen = False
         if input_listen in time_end_types:
             timeEnd = time.time()
             print()
-            print("Start time: ")
-            timePrint(timeStart)
+            timePrint("Start time: " ,timeStart)
+            timePrint("End time: " ,timeEnd)
             print()
-            print("End time: ")
-            timePrint(timeEnd)
-
             print("Used time: ")
             usedTime = countUsedTime(timeEnd, timeStart)
 
@@ -72,56 +114,35 @@ def endTime(timeStart, type_t):
             #usedTime = 420
 
             listen = False
-            saveData(usedTime, type_t)
-            timetracker()
+            saveData(data, usedTime, type_t, project)
+            readTimeType(data)
 
 
-def saveData(usedTime, type_t):
+def saveData(data, usedTime, type_t, project):
     weekNum = str(getWeek())
     if os.path.isfile(data_folder+'week'+weekNum+'.json'):
-        print('File already exists')
-        with open(data_folder+'week'+weekNum+'.json') as file_data:
-            data = json.load(file_data)
-            data = handleJson(data, usedTime, type_t)
-            file_data.close()
-            save(data, weekNum)
-    else:
         with open(data_folder+'week'+weekNum+'.json', 'w') as file_data:
-            print('Creating new file / starting new week')
-            data = []
-            day =   {   "date" : "",
-                        "uni" : 0,
-                        "opiskelu" : 0,
-                        "tyot" : 0,
-                        "muu" : 0
-                    }
-            day["date"] = str(date.today())
-            day[type_t] = usedTime
-            data.append(day)
+            for day in data:
+                if day["date"] == str(date.today()):
+                    if type_t == "work":
+                        nothappened = True
+                        for proj in day[type_t]:
+                            if proj["project_name"] == project:
+                                proj["time_used"] = proj["time_used"] + usedTime
+                                nothappened = False
+                        if nothappened:
+                            new_proj = {
+                                "project_name" : project,
+                                "time_used" : usedTime
+                            }
+                            day[type_t].append(new_proj)
+                                
+                    else:
+                        day[type_t] = day[type_t] + usedTime
             file_data.write(json.dumps(data, indent=4))
             file_data.close()
-
-
-def save(data, weekNum):
-    with open(data_folder+'week'+weekNum+'.json', 'w') as file_data:
-        file_data.write(json.dumps(data, indent=4))
-
-
-def handleJson(data, usedTime, type_t):
-    for i in data:
-        if str(date.today()) == i["date"]:
-            i[type_t] = i[type_t] + usedTime
-            return data
-    day =   {   "date" : "",
-                "uni" : 0,
-                "opiskelu" : 0,
-                "tyot" : 0,
-                "muu" : 0
-            }
-    day["date"] = str(date.today())
-    day[type_t] = day[type_t] + usedTime
-    data.append(day)
-    return data
+    else:
+        print('File not found')
 
 
 def countUsedTime(timeEnd, timeStart):
@@ -130,16 +151,34 @@ def countUsedTime(timeEnd, timeStart):
     timeUsedMin = int(timeUsed%60)
     print()
     print(str(timeUsedHour)+" hour and "+str(timeUsedMin)+" min")
+    print()
     return timeUsed #Palauttaa ajan minuutteina
     
 
-def timePrint(timePrint):
+def timePrint(info ,timePrint):
     timePrint = time.localtime(timePrint)
-    print(str(timePrint[3])+":"+str(timePrint[4])+":"+str(timePrint[5]))
+    print(info + str(timePrint[3])+":"+str(timePrint[4]))
 
 
 def getWeek():
     return date.today().isocalendar()[1]
+
+
+def minToHoursAndMins(mins):
+    timeUsedHour = int(mins // 60)
+    timeUsedMin = int(mins%60)
+    return str(timeUsedHour)+" hour and "+str(timeUsedMin)+" min"
+
+def nayta(data):
+    for day in data:
+        overal_worktime = 0
+        print("Date: " + day["date"])
+        for proj in day["work"]:
+            overal_worktime = overal_worktime + proj["time_used"]
+            print("   " + proj["project_name"] + " : " + minToHoursAndMins(proj["time_used"]))
+        print()
+        print("   Overal worktime: "+ minToHoursAndMins(overal_worktime))
+    readTimeType(data)
 
 
 def help_info():
