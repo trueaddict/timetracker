@@ -132,7 +132,7 @@ def endTime(data, timeStart, type_t, client, project):
             usedTime = countUsedTime(timeEnd, timeStart)
 
             #Debug
-            usedTime = 420
+            #usedTime = 420
 
             listen = False
             saveData(data, usedTime, type_t, client, project)
@@ -142,7 +142,7 @@ def endTime(data, timeStart, type_t, client, project):
             usedTime = countUsedTime(timeEnd, timeStart)
 
             #Debug
-            usedTime = 420
+            #usedTime = 420
 
             listen = False
             saveData(data, usedTime, type_t, client, project)
