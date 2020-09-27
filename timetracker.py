@@ -18,17 +18,24 @@ close_types = "exit"
 help_type = "help"
 nayta_list = ["n", "nayta", "show"]
 
-default_project = "kehitysprojekti"
+default_project = "muu"
+default_client = 'ceili'
 default_projects = {
     "project_name" : default_project,
     "time_used" : 0
 }
 
+clients = {
+    "client" : default_client,
+    "client_projects" : [default_projects]
+}
+
+
 default_day = { 
     "date" : str(date.today()),
     "sleep" : 0,
     "study" : 0,
-    "work" : [default_projects],
+    "work" : [clients],
     "other" : 0
 }
 
@@ -68,6 +75,17 @@ def initWeek():
 
 def readTimeType(data):
     time_type = input().split(' ')
+
+    client = ''
+    project = ''
+
+    if (len(time_type) > 2):
+        client = time_type[1]
+        project = time_type[2]
+    elif (len(time_type) == 2 ):
+        client = 'ceili'
+        project = time_type[1]
+
     if close_types == time_type[0]:
         close()
     if help_type == time_type[0]:
@@ -77,29 +95,32 @@ def readTimeType(data):
     for i in range(0,len(time_types)):
         if time_types[i] == time_type[0]:
             if (len(time_type) > 1):
-                startTime(data, time_types[i], time_type[1])
-            else: startTime(data, time_types[i], default_project)
+                startTime(data, time_types[i], client, project)
+            else: startTime(data, time_types[i], default_client, default_project)
         elif time_types_lyh[i] == time_type[0]:
             if (len(time_type) > 1):
-                startTime(data, time_types[i], time_type[1])
-            else: startTime(data, time_types[i], default_project)
+                startTime(data, time_types[i], client, project)
+            else: startTime(data, time_types[i], default_client, default_project)
     
 
-def startTime(data, type_t, project):
+def startTime(data, type_t, client, project):
     timeStart = time.time()
-    print( "Started " + type_t + " '" + project + "'")
+    print()
+    print("Started " + type_t)
+    print("Client: " + client)
+    print("Project: " + project)
     timePrint("", timeStart)
-    endTime(data, timeStart, type_t, project)
+    endTime(data, timeStart, type_t, client, project)
 
 
-def endTime(data, timeStart, type_t, project):
+def endTime(data, timeStart, type_t, client, project):
     listen = True
     while listen:
         input_listen = input()
         if input_listen == close_types:
             timeEnd = time.time()
             usedTime = countUsedTime(timeEnd, timeStart)
-            saveData(data, usedTime, type_t, project)
+            saveData(data, usedTime, type_t, client, project)
             listen = False
         if input_listen in time_end_types:
             timeEnd = time.time()
@@ -111,32 +132,56 @@ def endTime(data, timeStart, type_t, project):
             usedTime = countUsedTime(timeEnd, timeStart)
 
             #Debug
-            #usedTime = 420
+            usedTime = 420
 
             listen = False
-            saveData(data, usedTime, type_t, project)
+            saveData(data, usedTime, type_t, client, project)
             readTimeType(data)
+        if input_listen in nayta_list:
+            timeEnd = time.time()
+            usedTime = countUsedTime(timeEnd, timeStart)
+
+            #Debug
+            usedTime = 420
+
+            listen = False
+            saveData(data, usedTime, type_t, client, project)
+            nayta(data)
 
 
-def saveData(data, usedTime, type_t, project):
+
+def saveData(data, usedTime, type_t, client, project):
     weekNum = str(getWeek())
     if os.path.isfile(data_folder+'week'+weekNum+'.json'):
         with open(data_folder+'week'+weekNum+'.json', 'w') as file_data:
             for day in data:
                 if day["date"] == str(date.today()):
                     if type_t == "work":
-                        nothappened = True
-                        for proj in day[type_t]:
-                            if proj["project_name"] == project:
-                                proj["time_used"] = proj["time_used"] + usedTime
-                                nothappened = False
-                        if nothappened:
-                            new_proj = {
+                        clientExists = False
+                        projectExists = False
+                        for cli in day[type_t]:
+                            if cli["client"] == client:
+                                for proj in cli["client_projects"]:
+                                    if proj["project_name"] == project:
+                                        proj["time_used"] = proj["time_used"] + usedTime
+                                        projectExists = True
+                                if not projectExists:
+                                    newProject = {
+                                        "project_name" : project,
+                                        "time_used" : usedTime
+                                    }
+                                    cli["client_projects"].append(newProject)
+                                clientExists = True
+                        if not clientExists:
+                            newProject = {
                                 "project_name" : project,
                                 "time_used" : usedTime
                             }
-                            day[type_t].append(new_proj)
-                                
+                            newClient = {
+                                "client" : client,
+                                "client_projects" : [newProject]
+                            }
+                            day[type_t].append(newClient)
                     else:
                         day[type_t] = day[type_t] + usedTime
             file_data.write(json.dumps(data, indent=4))
@@ -170,14 +215,20 @@ def minToHoursAndMins(mins):
     return str(timeUsedHour)+" hour and "+str(timeUsedMin)+" min"
 
 def nayta(data):
+    #print(json.dumps(data, indent=4, sort_keys=False))
+    sis = "    "
+    print("-------------------------------------------------------")
     for day in data:
         overal_worktime = 0
         print("Date: " + day["date"])
-        for proj in day["work"]:
-            overal_worktime = overal_worktime + proj["time_used"]
-            print("   " + proj["project_name"] + " : " + minToHoursAndMins(proj["time_used"]))
+        for cli in day["work"]:
+            print(sis + cli["client"])
+            for proj in cli["client_projects"]:
+                overal_worktime = overal_worktime + proj["time_used"]
+                print(sis + sis + proj["project_name"] + " : " + minToHoursAndMins(proj["time_used"]))
         print()
         print("   Overal worktime: "+ minToHoursAndMins(overal_worktime))
+        print("-------------------------------------------------------")
     readTimeType(data)
 
 
