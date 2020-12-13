@@ -1,5 +1,6 @@
 # timetracker
 
+timetracker is a simple command-line application to track used time. I mainly used it to track my work hours.
 
 TODO:
 
