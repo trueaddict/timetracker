@@ -1,7 +1,6 @@
 import json
 import time
 import os.path
-import keyboard
 from datetime import date
 
 #TODO
