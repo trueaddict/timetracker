@@ -1,13 +1,14 @@
 import json
 import time
 import os.path
+import keyboard
 from datetime import date
 
 #TODO
 # - Poikkeavan Inputin hallinta
 # - 
-# - Koulukurssin yksilöllinen seuranta (Työprojektien seuranta)
-# - Datan syöttö ulos
+# - Koulukurssin yksilollinen seuranta (Tyoprojektien seuranta)
+# - Datan syotto ulos
 #   - Komentorivi <- DONE
 #   - Harvest
 
