@@ -9,7 +9,7 @@ cmdApp.py
 - More commands
   - Show
   - Edit
-    Way to edit previous trackings
+     - Way to edit previous trackings
   - Setup
-    Setup for the timetracker
-      filePath etc.
+     - Setup for the timetracker
+        - filePath etc.
