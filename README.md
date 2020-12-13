@@ -2,10 +2,7 @@
 
 timetracker is a simple command-line application to track used time. It's mainly design to track work hours.
 
-TODO:
-
-cmdApp.py
-
+TODO (cmdApp.py):
 - Ability to save
 - More commands
   - Show
