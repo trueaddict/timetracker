@@ -39,10 +39,10 @@ default_day = {
     "other" : 0
 }
 
-data_folder = "data/"
+data_folder = "data/2021"
 print(os.getcwd())
 if os.getcwd() == "/Users/otto":
-        data_folder = "coding/timetracker/data/"
+        data_folder = "coding/timetracker/data/2021"
 
 def timetracker():
     data = initWeek()
@@ -251,6 +251,7 @@ def help_info():
 
 def close():
     print("Time tracking ended!")
+    exit()
 
 
 if __name__ == '__main__':
