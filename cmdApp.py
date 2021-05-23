@@ -53,6 +53,8 @@ class TimetrackerShell(cmd.Cmd):
   prompt = '$ '
 
   filePath = 'testdata/' # data file path
+  if "timetracker" not in os.getcwd():
+    filePath = "coding/timetracker/testdata/"
   data = None # list of time tracking objects
   curTracking = None # time tracking object to handle attributes
 
