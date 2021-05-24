@@ -1,3 +1,2 @@
-data/
-data/week14.json
-*.json
+data/*
+testdata/*

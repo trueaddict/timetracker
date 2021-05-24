@@ -4,7 +4,24 @@ import json
 import os.path
 import time
 from time import strftime
-from datetime import date
+from datetime import date, timedelta, datetime
+
+
+CONFIG_FILE = 'timetracker_config.json'
+DATAFILES_PATH = 'datafiles_path'
+
+""" Read configs
+"""
+config = {
+  DATAFILES_PATH:"testdata"
+}
+if not os.path.isfile(CONFIG_FILE):
+  print('Config file not found. Using default config')
+else:
+  with open(CONFIG_FILE, 'r') as configJson:
+    config = json.load(configJson)
+
+print(json.dumps(config, indent=4))
 
 class timeObject():
   start = None
@@ -14,21 +31,21 @@ class timeObject():
   client = None
   project = None
 
-  def __init__(self, start, client='ceili', project='muu'):
+  def __init__(self, start=None, client='ceili', project='muu'):
     self.start = start
     self.client = client
     self.project = project
-    self.date = date.today()
+    self.date = datetime.now().date()
 
   def countUsedTime(self):
     """ Counts used time to minutes
     """
-    self.timeUsed = int(round((self.end-self.start)/60,6))
+    self.timeUsed = self.end-self.start # int(round(()/60,6))
 
   def toJSON(self):
     """ Returns object in Dict format
     """
-    return {"start": str(self.start) ,"end": str(self.end),"date": str(self.date),"timeUsed": str(self.timeUsed),"client": self.client,"project": self.project}
+    return {"start": self.start.strftime('%Y-%m-%d %H:%M:%S') ,"end": self.end.strftime('%Y-%m-%d %H:%M:%S') ,"date": str(self.date),"timeUsed": self.timeUsed.total_seconds() ,"client": self.client,"project": self.project}
 
   def timeToStr(self, val):
     """ Parses seconds to str
@@ -44,18 +61,18 @@ class timeObject():
     printTime('End time:', self.end)
     print('Client: ' + self.client)
     print('Project: ' + self.project)
-    print('Used time: ' + minToHoursAndMins(self.timeUsed))
+    print('Used time: ' + str(self.timeUsed))
     print()
 
 
 class TimetrackerShell(cmd.Cmd):
+  """ Cmd application
+  """
   intro = 'Welcome to timetracker. Type help or ? to list commands.\n'
   prompt = '$ '
 
-  filePath = 'testdata/' # data file path
-  if "timetracker" not in os.getcwd():
-    filePath = "coding/timetracker/testdata/"
-  data = None # list of time tracking objects
+  #filePath = 'testdata/' # data file path
+  data = [] # list of time tracking objects
   curTracking = None # time tracking object to handle attributes
 
   # --- timetracker commands ---
@@ -63,6 +80,7 @@ class TimetrackerShell(cmd.Cmd):
     'Start time tracking for work'
     params = parse(arg)
     self.startTime(params)
+    self.saveData()
     
 
   def do_l(self, arg):
@@ -70,10 +88,36 @@ class TimetrackerShell(cmd.Cmd):
     if self.curTracking is None:
       return
     self.endTime()
+    self.saveData()
+
+  def do_add(self, arg):
+    'Insert custom'
+    try:
+      params = parse(arg)
+      obj = timeObject()
+      obj.client = params[0]
+      obj.project = params[1]
+      obj.date = datetime.strptime(input('Date xx.xx.xxxx : '), '%d.%m.%Y')
+      obj.start = datetime.strptime(input('Start time xx:xx : '), '%H:%M')
+      obj.end = datetime.strptime(input('End time xx:xx : '), '%H:%M')
+    except ValueError:
+      print('Error, try again')
+      return
+    obj.countUsedTime()
+    print(obj.toJSON())
 
   def do_show(self, arg):
     'Show current weeks time usage'
-    printData(self.data)
+    params = parse(arg)
+    while len(params) < 2:
+      params.insert(0,None)
+    if params[0] is not None:
+      params[0] = datetime.strptime(params[0], '%d.%m.%Y').date()
+    else:
+      params[0] = datetime.now().date()
+    print('Given params:', params)
+    printData(self.data, date=params[0], client=params[1])
+    self.saveData()
 
   def do_exit(self, arg):
     'Stop application'
@@ -81,6 +125,15 @@ class TimetrackerShell(cmd.Cmd):
       self.endTime()
     print('Ending time tracking')
     return True
+
+  def do_config(self, arg):
+    'Setup timetracker'
+    config[DATAFILES_PATH] = os.path.abspath(input('Data files path: '))
+
+    saveConfig()
+    self.preloop()
+
+
 
   # --- utility methods ---
 
@@ -90,7 +143,7 @@ class TimetrackerShell(cmd.Cmd):
     if self.curTracking is not None:
       self.handleEndTracking()
       self.curTracking = None
-    self.curTracking = timeObject(time.time(), params[0], params[1])
+    self.curTracking = timeObject(datetime.now(), params[0], params[1])
     self.prompt = 'Client: '+ self.curTracking.client + '\nProject: ' + self.curTracking.project + '\n$ '
     print()
     printTime('Start time:' , self.curTracking.start)
@@ -104,7 +157,7 @@ class TimetrackerShell(cmd.Cmd):
     self.curTracking = None
 
   def handleEndTracking(self):
-    self.curTracking.end = time.time()
+    self.curTracking.end = datetime.now()
     self.curTracking.countUsedTime()
     self.data.append(self.curTracking)
     
@@ -113,7 +166,32 @@ class TimetrackerShell(cmd.Cmd):
   def postloop(self):
     """ Saves the data to correct JSON-file
     """
-    curWeekFilePath = curWeekPath(self.filePath)
+    self.saveData()
+
+
+  def preloop(self):
+    """ Reads the data from JSON-file and parses it to editable objects
+    """
+    createDataFilesDirectory(config[DATAFILES_PATH])
+    curWeekFilePath = currentWeekFilePath()
+    if os.path.isfile(curWeekFilePath):
+      with open(curWeekFilePath, 'r') as file_data:
+        self.data = []
+        data = json.load(file_data)
+        for i in data:
+          startTime = datetime.strptime(i['start'], '%Y-%m-%d %H:%M:%S')
+          endTime = datetime.strptime(i['end'], '%Y-%m-%d %H:%M:%S')
+          obj = timeObject(startTime, i['client'], i['project'])
+          obj.date = datetime.strptime(i['date'], '%Y-%m-%d').date()
+          obj.end = endTime
+          obj.timeUsed = timedelta(seconds=float(i['timeUsed']))
+          self.data.append(obj)
+    elif self.data is []:
+      self.data = []
+  
+  def saveData(self):
+    createDataFilesDirectory(config[DATAFILES_PATH])
+    curWeekFilePath = currentWeekFilePath()
     with open(curWeekFilePath, 'w') as file_data:
       data = []
       for i in self.data:
@@ -122,48 +200,46 @@ class TimetrackerShell(cmd.Cmd):
       file_data.close()
 
 
-  def preloop(self):
-    """ Reads the data from JSON-file and parses it to editable objects
-    """
-    curWeekFilePath = curWeekPath(self.filePath)
-    if os.path.isfile(curWeekFilePath):
-      with open(curWeekFilePath, 'r') as file_data:
-        self.data = []
-        data = json.load(file_data)
-        for i in data:
-          startTime = float(i['start'])
-          endTime = float(i['end'])
-          obj = timeObject(startTime, i['client'], i['project'])
-          obj.date = date.fromisoformat(i['date'])
-          obj.end = endTime
-          obj.timeUsed = int(i['timeUsed'])
-          self.data.append(obj)
-    else:
-      self.data = []
-
-
-def printData(data):
+def printData(data, date=None, client=None):
   print()
   indent = "  "
   dataDict = {}
   for i in data:
-    dataDict[i.client] = {}
+    if date == None and client == None:
+      dataDict[i.client] = {}
+    elif i.date == date and client == None:
+      dataDict[i.client] = {}
+    elif i.date == date and client == i.client:
+      dataDict[i.client] = {}
+  
   for i in data:
-    dataDict[i.client][i.project] = 0
+    if date == None and client == None:
+      dataDict[i.client][i.project] = datetime.min
+    elif i.date == date and client == None:
+      dataDict[i.client][i.project] = datetime.min
+    elif i.date == date and client == i.client:
+      dataDict[i.client][i.project] = datetime.min
+    
   for i in data:
-    dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
+    if date == None and client == None:
+      dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
+    elif i.date == date and client == None:
+      dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
+    elif i.date == date and client == i.client:
+      dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
+    
   for i in dataDict.keys():
     print(i)
     for j in dataDict[i]:
-      print(indent + j + ' : ' + minToHoursAndMins(dataDict[i][j]))
+      print(indent + j + ' : ' + dataDict[i][j].strftime('%H:%M'))
   print()
 
-def curWeekPath(folderPath):
+def currentWeekFilePath():
   """ Return filename and path
   """
   weekNum = str(date.today().isocalendar()[1])
   year = str(date.today().year)
-  return folderPath + '/' + year + '_week'+weekNum+'.json'
+  return config[DATAFILES_PATH] + '/' + year + '_week'+weekNum+'.json'
 
 def parse(arg):
   'Parses args to list'
@@ -172,8 +248,8 @@ def parse(arg):
 def printTime(text ,argTime):
   """ Prints time (seconds) with text
   """
-  localTime = time.localtime(argTime)
-  strTime = str(localTime[3])+':'+str(localTime[4])
+  #localTime = time.localtime(argTime)
+  strTime = argTime.strftime('%H:%M')
   print(text + ' ' + strTime)
   return strTime
 
@@ -183,6 +259,16 @@ def minToHoursAndMins(mins):
   timeUsedHour = int(mins // 60)
   timeUsedMin = int(mins%60)
   return str(timeUsedHour)+" hour and "+str(timeUsedMin)+" min"
+
+
+def createDataFilesDirectory(path):
+  if not os.path.isdir(path):
+    os.makedirs(path)
+    
+
+def saveConfig():
+  with open(CONFIG_FILE, 'w') as configJson:
+    configJson.write(json.dumps(config, indent=2))
 
 if __name__ == '__main__':
   TimetrackerShell().cmdloop()
