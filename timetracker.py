@@ -22,6 +22,7 @@ else:
     config = json.load(configJson)
 
 print(json.dumps(config, indent=4))
+print()
 
 class timeObject():
   start = None
@@ -107,10 +108,14 @@ class TimetrackerShell(cmd.Cmd):
     print(obj.toJSON())
 
   def do_show(self, arg):
-    'Show current weeks time usage'
+    '''
+    show - todays time usage
+    show day.month.year - specific date time usage
+    show day.month.year client - specific date specific client time usage
+    '''
     params = parse(arg)
     while len(params) < 2:
-      params.insert(0,None)
+      params.append(None)
     if params[0] is not None:
       params[0] = datetime.strptime(params[0], '%d.%m.%Y').date()
     else:
