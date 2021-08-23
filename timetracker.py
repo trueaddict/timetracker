@@ -208,6 +208,7 @@ class TimetrackerShell(cmd.Cmd):
 def printData(data, date=None, client=None):
   print()
   indent = "  "
+  overall_time = datetime.min
   dataDict = {}
   for i in data:
     if date == None and client == None:
@@ -228,15 +229,20 @@ def printData(data, date=None, client=None):
   for i in data:
     if date == None and client == None:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
+      overall_time = overall_time + i.timeUsed
     elif i.date == date and client == None:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
+      overall_time = overall_time + i.timeUsed
     elif i.date == date and client == i.client:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
-    
-  for i in dataDict.keys():
-    print(i)
-    for j in dataDict[i]:
-      print(indent + j + ' : ' + dataDict[i][j].strftime('%H:%M'))
+      overall_time = overall_time + i.timeUsed
+
+  for client_name in dataDict.keys():
+    print(client_name)
+    for project_name in dataDict[client_name]:
+      print(indent + project_name + ' : ' + dataDict[client_name][project_name].strftime('%H:%M'))
+  print()
+  print('Total: ' + overall_time.strftime('%H:%M'))
   print()
 
 def currentWeekFilePath():
