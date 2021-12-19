@@ -1,0 +1,7 @@
+{
+  "datafiles_path": "/Users/otto/coding/timetracker/testdata",
+  "harvest": {
+    "account_id":"<account_id>",
+    "user_token":"<user_token>"
+  }
+}
