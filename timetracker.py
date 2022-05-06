@@ -21,7 +21,9 @@ config = {
   'harvest': {
     ACCOUNT_ID:'',
     USER_TOKEN:''
-  }
+  },
+  'weekly working time': '37.5',
+  'weekly capacity %': '75'
 }
 if not os.path.isfile(CONFIG_FILE):
   print('Config file not found. Using default config')
@@ -96,7 +98,10 @@ class TimetrackerShell(cmd.Cmd):
 
   # --- timetracker commands ---
   def do_ty(self, arg):
-    'Start time tracking for work'
+    """
+    Start time tracking for work
+    ty <client> <project>
+    """
     params = parse(arg)
     self.startTime(params)
     self.saveData()
@@ -126,7 +131,10 @@ class TimetrackerShell(cmd.Cmd):
     self.saveData()
 
   def do_add(self, arg):
-    'Insert custom'
+    """
+    Insert custom
+    add <client> <project>
+    """
     try:
       params = parse(arg)
       obj = timeObject()
@@ -166,10 +174,30 @@ class TimetrackerShell(cmd.Cmd):
     return True
 
   def do_config(self, arg):
-    'Setup timetracker'
-    config[DATAFILES_PATH] = os.path.abspath(input('Data files path: '))
-    config['harvest'][ACCOUNT_ID] = os.path.abspath(input('Harvest account id: '))
-    config['harvest'][USER_TOKEN] = os.path.abspath(input('Harvest user token: ')) 
+    """
+    Setup timetracker
+    """
+    
+    print('Setup configs')
+    print('Leave value empty to use current value')
+    print()
+
+    for key, item in config.items():
+      if type(item) == dict:
+        for key2, item2 in item.items():
+          print('Current value:', config[key][key2])
+          value = input(key + ', ' + key2 + ': ')
+          if value.strip() != '':
+            config[key][key2] = value
+      else:
+        value = ''
+        print('Current value:', config[key])
+        if key == 'datafiles_path':
+           value = os.path.abspath(input(key + ': '))
+        else:
+          value = input(key + ': ')
+        if value.strip() != '':
+          config[key] = value
 
     saveConfig()
     self.preloop()

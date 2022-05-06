@@ -1,0 +1,146 @@
+[
+    {
+        "start": "2022-05-02 10:01:50",
+        "end": "2022-05-02 10:47:29",
+        "date": "2022-05-02",
+        "timeUsed": 2739.554245,
+        "client": "verto",
+        "project": "tuotantoon-vienti"
+    },
+    {
+        "start": "2022-05-02 10:49:03",
+        "end": "2022-05-02 12:04:47",
+        "date": "2022-05-02",
+        "timeUsed": 4544.155825,
+        "client": "axopar_boats_oy",
+        "project": "production-planning-settings"
+    },
+    {
+        "start": "2022-05-02 13:04:32",
+        "end": "2022-05-02 16:22:02",
+        "date": "2022-05-02",
+        "timeUsed": 11849.982782,
+        "client": "axopar_boats_oy",
+        "project": "production-planning-settings"
+    },
+    {
+        "start": "2022-05-03 12:46:24",
+        "end": "2022-05-03 13:03:26",
+        "date": "2022-05-03",
+        "timeUsed": 1022.485762,
+        "client": "axopar_boats_oy",
+        "project": "production-planning-weekly"
+    },
+    {
+        "start": "2022-05-03 13:03:31",
+        "end": "2022-05-03 14:00:21",
+        "date": "2022-05-03",
+        "timeUsed": 3410.677681,
+        "client": "axopar_boats_oy",
+        "project": "production-planning"
+    },
+    {
+        "start": "2022-05-03 18:37:32",
+        "end": "2022-05-04 10:29:03",
+        "date": "2022-05-03",
+        "timeUsed": 57091.131019,
+        "client": "fida",
+        "project": "import-part_n"
+    },
+    {
+        "start": "2022-05-04 10:37:38",
+        "end": "2022-05-04 11:09:11",
+        "date": "2022-05-04",
+        "timeUsed": 1893.157002,
+        "client": "fida",
+        "project": "import-laskutustiedot"
+    },
+    {
+        "start": "2022-05-04 11:10:18",
+        "end": "2022-05-04 11:46:29",
+        "date": "2022-05-04",
+        "timeUsed": 2170.705133,
+        "client": "ceili",
+        "project": "jubailut-musan-kanssa"
+    },
+    {
+        "start": "2022-05-04 11:46:32",
+        "end": "2022-05-04 13:43:45",
+        "date": "2022-05-04",
+        "timeUsed": 7033.360782,
+        "client": "fida",
+        "project": "import-laskutustiedot"
+    },
+    {
+        "start": "2022-05-04 13:44:01",
+        "end": "2022-05-04 14:09:05",
+        "date": "2022-05-04",
+        "timeUsed": 1504.226949,
+        "client": "fida",
+        "project": "in-project-available-fix"
+    },
+    {
+        "start": "2022-05-04 14:30:13",
+        "end": "2022-05-04 16:22:57",
+        "date": "2022-05-04",
+        "timeUsed": 6763.925576,
+        "client": "axopar_boats_oy",
+        "project": "production-plannign"
+    },
+    {
+        "start": "2022-05-04 17:26:51",
+        "end": "2022-05-04 18:54:20",
+        "date": "2022-05-04",
+        "timeUsed": 5248.705102,
+        "client": "steerprop_oy",
+        "project": "import-valmistelu"
+    },
+    {
+        "start": "2022-05-04 18:54:27",
+        "end": "2022-05-04 19:22:29",
+        "date": "2022-05-04",
+        "timeUsed": 1682.210558,
+        "client": "verto",
+        "project": "pienkehitys"
+    },
+    {
+        "start": "2022-05-05 12:08:02",
+        "end": "2022-05-05 12:40:08",
+        "date": "2022-05-05",
+        "timeUsed": 1925.769414,
+        "client": "ceili",
+        "project": "tomin-kyss\u00e4rit"
+    },
+    {
+        "start": "2022-05-05 13:25:19",
+        "end": "2022-05-05 15:53:01",
+        "date": "2022-05-05",
+        "timeUsed": 8861.757157,
+        "client": "verto",
+        "project": "moduuli-selvittely"
+    },
+    {
+        "start": "2022-05-06 08:54:07",
+        "end": "2022-05-06 11:30:37",
+        "date": "2022-05-06",
+        "timeUsed": 9390.029584,
+        "client": "fida",
+        "project": "recurring-korjailut"
+    },
+    {
+        "start": "2022-05-06 11:30:57",
+        "end": "2022-05-06 11:47:26",
+        "date": "2022-05-06",
+        "timeUsed": 989.299587,
+        "client": "verto",
+        "project": "tarjous-pdf-tekstin-lis\u00e4ys"
+    },
+    {
+        "start": "2022-05-06 12:42:31",
+        "end": "2022-05-06 12:55:04",
+        "date": "2022-05-06",
+        "timeUsed": 753.20893,
+        "client": "axopar_boats_oy",
+        "project": "konfiguraattori-logiikan-selvittely"
+    }
+]
