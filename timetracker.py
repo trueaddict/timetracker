@@ -279,11 +279,11 @@ def printData(data, date=None, client=None):
   overall_time_week = datetime.min
   
 
-  week_startDate = datetime.today - timedelta(days=datetime.today.weekday())
+  week_startDate = datetime.today().date() - timedelta(days=datetime.today().date().weekday())
   week_endDate = week_startDate + timedelta(days=6)
   
-  print(week_startDate.strftime('%d/%b/%Y'))
-  print(week_endDate.strftime('%d/%b/%Y'))
+  print(week_startDate)
+  print(week_endDate)
   
   dataDict = {}
   for i in data:
@@ -312,6 +312,8 @@ def printData(data, date=None, client=None):
     elif i.date == date and client == i.client:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
       overall_time = overall_time + i.timeUsed
+    if i.date >= week_startDate and i.date <= week_endDate:
+      overall_time_week = overall_time_week + i.timeUsed
 
   for client_name in dataDict.keys():
     print(client_name)
@@ -319,8 +321,24 @@ def printData(data, date=None, client=None):
       print(indent + project_name + ' : ' + dataDict[client_name][project_name].strftime('%H:%M'))
   print()
   print('Total today: ' + overall_time.strftime('%H:%M'))
-  # TODO Print used week capacity
   print()
+  #capacityProgressBar(overall_time_week)
+  print()
+
+def capacityProgressBar(overall_time_week):
+  """
+  !NOTE In progress
+  'weekly working time': '37.5',
+  'weekly capacity %': '75'
+  """ 
+  weekCapacity = round(float(config['weekly working time']) * (float(config['weekly capacity %']) / 100), 2)
+  weekTotal = round(abs(datetime.min - overall_time_week).total_seconds() / 3600, 2)
+  
+  print('Week total:', weekTotal)
+  print('Week capacity:', weekCapacity)
+  
+
+
 
 def currentWeekFilePath():
   """ Return filename and path
