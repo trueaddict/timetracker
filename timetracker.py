@@ -276,6 +276,15 @@ def printData(data, date=None, client=None):
   print()
   indent = "  "
   overall_time = datetime.min
+  overall_time_week = datetime.min
+  
+
+  week_startDate = datetime.today - timedelta(days=datetime.today.weekday())
+  week_endDate = week_startDate + timedelta(days=6)
+  
+  print(week_startDate.strftime('%d/%b/%Y'))
+  print(week_endDate.strftime('%d/%b/%Y'))
+  
   dataDict = {}
   for i in data:
     if date == None and client == None:
@@ -309,7 +318,8 @@ def printData(data, date=None, client=None):
     for project_name in dataDict[client_name]:
       print(indent + project_name + ' : ' + dataDict[client_name][project_name].strftime('%H:%M'))
   print()
-  print('Total: ' + overall_time.strftime('%H:%M'))
+  print('Total today: ' + overall_time.strftime('%H:%M'))
+  # TODO Print used week capacity
   print()
 
 def currentWeekFilePath():
