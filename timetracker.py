@@ -6,6 +6,8 @@ import time
 import re
 from time import strftime
 from datetime import date, timedelta, datetime
+
+from numpy import full
 from harvest import Harvest
 
 
@@ -322,7 +324,7 @@ def printData(data, date=None, client=None):
   print()
   print('Total today: ' + overall_time.strftime('%H:%M'))
   print()
-  #capacityProgressBar(overall_time_week)
+  capacityProgressBar(overall_time_week)
   print()
 
 def capacityProgressBar(overall_time_week):
@@ -337,8 +339,34 @@ def capacityProgressBar(overall_time_week):
   print('Week total:', weekTotal)
   print('Week capacity:', weekCapacity)
   
+  
+  fullBarLength = 100
+  barLength = int((weekTotal / weekCapacity) * 100)
+  printBar(barLength=fullBarLength, text=' Week capacity (' + str(weekCapacity) + 'h / ' +  str(round((weekCapacity / 37.5) * 100))  + '%) ', barStart='|', barEnd='|')
+  printBar(barLength=barLength, text=' ' + str(weekTotal) + 'h ', barStart='|', barEnd='>')
 
+def printBar(barLength=100, text='', barStart='', barEnd=''):
+  bar = [barStart]
+  for i in range(barLength):
+    bar.append('=')
+  
+  if len(text) % 2 != 0:
+    text = text + ' '
 
+  if len(text) < len(bar):
+    textList = list(text)
+    j = 0
+    for i in range(int(len(bar)/2) - int(len(text) / 2), int(len(bar)/2) + int(len(text) / 2)):
+      bar[i] = textList[j]
+      j = j + 1
+    bar.append(barEnd)
+  else:
+    textList = list(text)
+    bar.append(barEnd)
+    for s in textList:
+      bar.append(s)
+
+  print(''.join(bar))
 
 def currentWeekFilePath():
   """ Return filename and path
