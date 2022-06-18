@@ -1,6 +1,9 @@
+from time import time
 import requests
 import sys, getopt
 import pprint
+from datetime import date, timedelta
+
 
 class Harvest:
     user_token = ''
@@ -31,6 +34,21 @@ class Harvest:
                 list_tasks.add(f'{task_name}')
         return list(list_tasks)
 
+    def getTimeEntries(self, startDate=date.today()+timedelta(days=-1), endDate=date.today()+timedelta(days=-1)): # !NOTE Remove timedelta, used only for testing
+        print(startDate)
+        print(endDate)
+        entries = self.getResource('time_entries', {'user_id' : self.user_details['id'], 'from' : startDate, 'to' : endDate})
+        
+        list_entries = []
+        
+        # pprint.pprint(entries['time_entries'][:1])
+
+        for entry in  entries['time_entries']:
+            entry['timeUsed'] = entry['hours']*60*60
+            list_entries.append(entry)
+        # pprint.pprint(list_entries[:1])
+        print(len(list_entries))
+        return list_entries
 
 
     def getResource(self, resource, params={}):
@@ -49,6 +67,11 @@ class Harvest:
             raise SystemExit(e)
 
 def main(argv):
+    """
+    Example:
+
+    python harvest.py -t "<user_token>" -i "<account_id>"
+    """
     user_token = ''
     account_id = ''
 
@@ -65,6 +88,10 @@ def main(argv):
             account_id = arg 
     
     harvest = Harvest(user_token, account_id)
+    harvest.getTimeEntries()
+    startOfWeek = date.today() - timedelta(days=date.today().weekday())
+    endOfWeek = startOfWeek + timedelta(days=6)
+    harvest.getTimeEntries(startDate=startOfWeek, endDate=endOfWeek)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
