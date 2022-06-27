@@ -2,10 +2,12 @@ from time import time
 import requests
 import sys, getopt
 import pprint
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 
 class Harvest:
+    debug = False
+
     user_token = ''
     account_id = ''
 
@@ -34,9 +36,10 @@ class Harvest:
                 list_tasks.add(f'{task_name}')
         return list(list_tasks)
 
-    def getTimeEntries(self, startDate=date.today()+timedelta(days=-1), endDate=date.today()+timedelta(days=-1)): # !NOTE Remove timedelta, used only for testing
-        print(startDate)
-        print(endDate)
+    def getTimeEntries(self, startDate=date.today(), endDate=date.today()): # !NOTE Remove timedelta, used only for testing
+        if self.debug:
+            print(startDate)
+            print(endDate)
         entries = self.getResource('time_entries', {'user_id' : self.user_details['id'], 'from' : startDate, 'to' : endDate})
         
         list_entries = []
@@ -44,10 +47,11 @@ class Harvest:
         # pprint.pprint(entries['time_entries'][:1])
 
         for entry in  entries['time_entries']:
-            entry['timeUsed'] = entry['hours']*60*60
+            entry['timeUsed'] = timedelta(seconds=entry['hours']*60*60)
             list_entries.append(entry)
-        # pprint.pprint(list_entries[:1])
-        print(len(list_entries))
+        if self.debug:
+            pprint.pprint(list_entries[:1])
+            print(len(list_entries))
         return list_entries
 
 
@@ -88,10 +92,13 @@ def main(argv):
             account_id = arg 
     
     harvest = Harvest(user_token, account_id)
+    harvest.debug = True
     harvest.getTimeEntries()
     startOfWeek = date.today() - timedelta(days=date.today().weekday())
     endOfWeek = startOfWeek + timedelta(days=6)
-    harvest.getTimeEntries(startDate=startOfWeek, endDate=endOfWeek)
+    todayEntries = harvest.getTimeEntries(startDate=date.today(), endDate=date.today())
+    weekEntries = harvest.getTimeEntries(startDate=startOfWeek, endDate=endOfWeek)
+    # printDataHarvest(todayEntries, weekEntries)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

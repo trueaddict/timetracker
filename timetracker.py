@@ -168,6 +168,17 @@ class TimetrackerShell(cmd.Cmd):
     printData(self.data, date=params[0], client=params[1])
     self.saveData()
 
+  def do_harvest(self, arg):
+    '''
+    harvest - list harvest time entries
+    '''
+
+    startOfWeek = date.today() - timedelta(days=date.today().weekday())
+    endOfWeek = startOfWeek + timedelta(days=6)
+    todayEntries = self.harvest.getTimeEntries(startDate=date.today(), endDate=date.today())
+    weekEntries = self.harvest.getTimeEntries(startDate=startOfWeek, endDate=endOfWeek)
+    printDataHarvest(todayEntries, weekEntries)
+
   def do_exit(self, arg):
     'Stop application'
     if self.curTracking is not None:
@@ -324,42 +335,47 @@ def printData(data, date=None, client=None):
   capacityProgressBar(overall_time_week)
   print()
 
-"""
 def printDataHarvest(entriesToday, entriesWeek):
-  print()
-  indent = "  "
-  overall_time = datetime.min
-  overall_time_week = datetime.min
-  
-
-  week_startDate = datetime.today().date() - timedelta(days=datetime.today().date().weekday())
-  week_endDate = week_startDate + timedelta(days=6)
-  
-  dataDict = {}
+    print()
+    indent = "  "
+    overall_time = datetime.min
+    overall_time_week = datetime.min
     
-  for i in data:
-    if date == None and client == None:
-      dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
-      overall_time = overall_time + i.timeUsed
-    elif i.date == date and client == None:
-      dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
-      overall_time = overall_time + i.timeUsed
-    elif i.date == date and client == i.client:
-      dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
-      overall_time = overall_time + i.timeUsed
-    if i.date >= week_startDate and i.date <= week_endDate:
-      overall_time_week = overall_time_week + i.timeUsed
 
-  for client_name in dataDict.keys():
-    print(client_name)
-    for project_name in dataDict[client_name]:
-      print(indent + project_name + ' : ' + dataDict[client_name][project_name].strftime('%H:%M'))
-  print()
-  print('Total today: ' + overall_time.strftime('%H:%M'))
-  print()
-  capacityProgressBar(overall_time_week)
-  print()
-"""
+    week_startDate = datetime.today().date() - timedelta(days=datetime.today().date().weekday())
+    week_endDate = week_startDate + timedelta(days=6)
+    
+    dataDict = {}
+    
+    # Init dataDict
+    for i in entriesToday:
+        client = {}
+        if i['client']['name'] not in dataDict.keys():
+            dataDict[i['client']['name']] = client
+        else:
+            client = dataDict[i['client']['name']]
+        client[i['task']['name']] = datetime.min
+        dataDict[i['client']['name']] = client
+
+    # Count used time per client and project on selected date / today
+    for i in entriesToday:
+        dataDict[i['client']['name']][i['task']['name']] = dataDict[i['client']['name']][i['task']['name']] + i['timeUsed']
+        overall_time = overall_time + i['timeUsed']
+
+    # Count week total hours
+    for i in entriesWeek:
+        overall_time_week = overall_time_week + i['timeUsed']
+    
+    for client_name in dataDict.keys():
+        print(client_name)
+        for project_name in dataDict[client_name]:
+            print(indent + project_name + ' : ' + dataDict[client_name][project_name].strftime('%H:%M'))
+    # pprint.pprint(dataDict)
+    print()
+    print('Total today: ' + overall_time.strftime('%H:%M'))
+    print()
+    capacityProgressBar(overall_time_week)
+    print()
 
 def capacityProgressBar(overall_time_week):
   """
