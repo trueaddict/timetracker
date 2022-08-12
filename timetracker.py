@@ -92,6 +92,8 @@ class TimetrackerShell(cmd.Cmd):
   intro = 'Welcome to timetracker. Type help or ? to list commands.\n'
   prompt = '$ '
 
+  runTime = None
+
   harvest = None
 
   #filePath = 'testdata/' # data file path
@@ -165,8 +167,16 @@ class TimetrackerShell(cmd.Cmd):
     else:
       params[0] = datetime.now().date()
     print('Given params:', params)
-    printData(self.data, date=params[0], client=params[1])
+    # printData(self.data, date=params[0], client=params[1])
     self.saveData()
+    runTimeData = [i for i in self.data]
+
+    self.runTime.end = datetime.now()
+    self.runTime.countUsedTime()
+    runTimeData.append(self.runTime)
+    
+    printData(runTimeData, date=params[0], client=params[1])
+    
 
   def do_harvest(self, arg):
     '''
@@ -273,6 +283,10 @@ class TimetrackerShell(cmd.Cmd):
 
     if 'harvest' in config.keys():
       self.harvest = Harvest(user_token=config['harvest'][USER_TOKEN], account_id=config['harvest'][ACCOUNT_ID])
+    
+    if self.runTime is None:
+      self.runTime = timeObject(datetime.now(), 'runtime', 'today')
+
   
   def saveData(self):
     createDataFilesDirectory(config[DATAFILES_PATH])
@@ -315,13 +329,15 @@ def printData(data, date=None, client=None):
   for i in data:
     if date == None and client == None:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
-      overall_time = overall_time + i.timeUsed
+      
     elif i.date == date and client == None:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
-      overall_time = overall_time + i.timeUsed
+      
     elif i.date == date and client == i.client:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
-      overall_time = overall_time + i.timeUsed
+    if i.client == 'runtime': continue  # skip runtime from overall counts
+    
+    overall_time = overall_time + i.timeUsed
     if i.date >= week_startDate and i.date <= week_endDate:
       overall_time_week = overall_time_week + i.timeUsed
 
