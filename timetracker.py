@@ -335,6 +335,8 @@ def printData(data, date=None, client=None):
       
     elif i.date == date and client == i.client:
       dataDict[i.client][i.project] = dataDict[i.client][i.project] + i.timeUsed
+    
+    if i.date == date and client != 'runtime':
       overall_time = overall_time + i.timeUsed
     
     if i.client == 'runtime': continue  # skip runtime from overall counts
