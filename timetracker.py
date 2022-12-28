@@ -4,6 +4,7 @@ import json
 import os.path
 import time
 import re
+import subprocess
 from time import strftime
 from datetime import date, timedelta, datetime
 
@@ -225,7 +226,9 @@ class TimetrackerShell(cmd.Cmd):
     saveConfig()
     self.preloop()
 
-
+  def default(self, arg):
+    subprocess.call(arg,shell=True)
+    
 
   # --- utility methods ---
 
