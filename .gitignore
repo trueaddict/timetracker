@@ -1,4 +1,7 @@
+
+__pycache__/
 data/*
 testdata/*
+venv/
 
 timetracker_config.json

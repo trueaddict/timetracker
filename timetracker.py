@@ -1,14 +1,11 @@
 import cmd
-import sys
 import json
 import os.path
 import time
 import re
-import subprocess
 from time import strftime
 from datetime import date, timedelta, datetime
 
-from numpy import full
 from harvest import Harvest
 
 
@@ -126,6 +123,7 @@ class TimetrackerShell(cmd.Cmd):
     if i == 2:
       searchlist = self.harvest.getTasks()
 
+    print('Fetch clients or tasks')
     return [s[offs:] for s in searchlist if s.lower().startswith(searchterm)]
 
   def do_l(self, arg):
@@ -226,8 +224,8 @@ class TimetrackerShell(cmd.Cmd):
     saveConfig()
     self.preloop()
 
-  def default(self, arg):
-    subprocess.call(arg,shell=True)
+  # def default(self, arg):
+    # subprocess.call(arg,shell=True)
     
 
   # --- utility methods ---
@@ -483,8 +481,8 @@ def saveConfig():
     configJson.write(json.dumps(config, indent=2))
 
 if __name__ == '__main__':
-  try:
-    import readline
-  except ImportError:
-    sys.stdout.write("No readline module found, no tab completion available.\n")
+  # try:
+  #   import readline
+  # except ImportError:
+  #   print("No readline module found, no tab completion available.\n")
   TimetrackerShell().cmdloop()

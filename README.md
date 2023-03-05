@@ -21,3 +21,4 @@ Run the application
 ```shell
 python cmdApp.py
 ```
+Development with python env: https://realpython.com/python-virtual-environments-a-primer/
